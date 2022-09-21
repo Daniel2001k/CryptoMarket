@@ -1,6 +1,8 @@
 ﻿@page "/fetchdata"
 @using CryptoMarket.Hub.Shared
-@inject HttpClient Http
+
+@inject IHttpClientFactory Http
+@inject NavigationManager Nav
 
 <PageTitle>Weather forecast</PageTitle>
 
@@ -42,6 +44,8 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        forecasts = await Http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
+        var http = Http.CreateClient();
+        http.BaseAddress = new Uri(Nav.BaseUri);
+        forecasts = await http.GetFromJsonAsync<WeatherForecast[]>("WeatherForecast");
     }
 }

@@ -1,9 +1,11 @@
 using CryptoMarket.Hub.Shared;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CryptoMarket.Hub.Server.Controllers
 {
     [ApiController]
+    [Authorize]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase
     {
