@@ -1,18 +1,46 @@
 ﻿@inherits LayoutComponentBase
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@using Microsoft.AspNetCore.Components.WebAssembly.Hosting
 
-    <main>
-        <div class="top-row px-4">
-            <LoginDisplay />
-            <a href="https://docs.microsoft.com/aspnet/" target="_blank">About</a>
-        </div>
+@inject IWebAssemblyHostEnvironment HostEnvironment
 
-        <article class="content px-4">
+<MudThemeProvider @bind-IsDarkMode="@_isDarkMode" Theme="_theme"/>
+<MudDialogProvider />
+<MudSnackbarProvider />
+
+<MudLayout>
+    <MudAppBar>
+        <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@((e) => DrawerToggle())" />
+        My Application
+        <MudSwitch @bind-Checked="@_isDarkMode" Color="Color.Primary" Class="ma-4" T="bool" Label="Toggle Light/Dark Mode"/>
+        <LoginDisplay />
+        @if (HostEnvironment.IsDevelopment())
+        {
+            @*will be seen on bottom of the page*@
+            <MudGrid Style="bottom: 0; position: fixed; width: 100%; height: 40px; background-color: grey;">
+                <div class="ml-5">DEV tools:</div>
+                <MudButton Link="/claims" Color="Color.Secondary" Size="Size.Small">Claims</MudButton>
+            </MudGrid>
+        }
+    </MudAppBar>
+    <MudDrawer @bind-Open="@_drawerOpen">
+        <NavMenu/>
+    </MudDrawer>
+    <MudMainContent>
+        <MudContainer MaxWidth="MaxWidth.Medium">
             @Body
-        </article>
-    </main>
-</div>
+        </MudContainer>
+    </MudMainContent>
+</MudLayout>
+
+@code {
+    private MudTheme _theme = new();
+    private bool _isDarkMode;
+
+    bool _drawerOpen = true;
+
+    void DrawerToggle()
+    {
+        _drawerOpen = !_drawerOpen;
+    }
+}
