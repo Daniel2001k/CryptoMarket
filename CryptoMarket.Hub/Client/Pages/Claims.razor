@@ -1,0 +1,63 @@
+﻿@page "/claims"
+@using System.Security.Claims
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<h3>ClaimsPrincipal Data</h3>
+
+<p>@_authMessage</p>
+
+@if (_claims.Count() > 0)
+{
+    <table class="table">
+        @foreach (var claim in _claims)
+        {
+            <tr>
+                <td>@claim.Type</td>
+                <td>@claim.Value</td>
+            </tr>
+        }
+    </table>
+}
+
+<p>User Id (sub): <b>@_userId</b></p>
+<h3>Roles</h3>
+<ul>
+    @foreach (var role in _roles)
+    {
+        <li><b>@role.Key</b> : @role.Value </li>
+    }
+</ul>
+
+@code {
+    private string _authMessage;       
+    private string _userId;
+    private IEnumerable<Claim> _claims = Enumerable.Empty<Claim>();
+    private Dictionary<string, bool> _roles = new();
+    protected override async Task OnParametersSetAsync()
+    {
+        await GetClaimsPrincipalData();
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task GetClaimsPrincipalData()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            _authMessage = $"{user.Identity.Name} is authenticated.";
+            _claims = user.Claims;
+            _userId = $"{user.FindFirst(c => c.Type == "sub")?.Value}";
+            
+            _roles["SomeOtherModule_access"] = user.IsInRole("SomeOtherModule_access");
+        }
+        else
+        {
+            _authMessage = "The user is NOT authenticated.";
+        }
+
+   
+
+    }
+}
