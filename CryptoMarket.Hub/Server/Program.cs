@@ -1,5 +1,4 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Okta.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,23 +10,14 @@ builder.Services.AddControllersWithViews();
 
 builder.Services.AddAuthentication(authOptions =>
 {
-    authOptions.DefaultAuthenticateScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    authOptions.DefaultSignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    authOptions.DefaultSignOutScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-    authOptions.DefaultChallengeScheme = OpenIdConnectDefaults.AuthenticationScheme;
-}).AddOpenIdConnect(oidcOptions =>
+    authOptions.DefaultAuthenticateScheme = OktaDefaults.ApiAuthenticationScheme;
+    authOptions.DefaultSignInScheme = OktaDefaults.ApiAuthenticationScheme;
+    authOptions.DefaultSignOutScheme = OktaDefaults.ApiAuthenticationScheme;
+    authOptions.DefaultChallengeScheme = OktaDefaults.ApiAuthenticationScheme;
+}).AddOktaWebApi(new OktaWebApiOptions()
 {
-    oidcOptions.ClientId = builder.Configuration.GetValue<string>("Okta:ClientId");
-    oidcOptions.ClientSecret = builder.Configuration.GetValue<string>("Okta:ClientSecret");
-    oidcOptions.CallbackPath = "/authorization-code/callback";
-    oidcOptions.Authority = builder.Configuration.GetValue<string>("Okta:Issuer");
-    oidcOptions.ResponseType = "code";
-    oidcOptions.SaveTokens = true;
-    oidcOptions.Scope.Add("openid");
-    oidcOptions.Scope.Add("profile");
-    oidcOptions.TokenValidationParameters.ValidateIssuer = false;
-    oidcOptions.TokenValidationParameters.NameClaimType = "name";
-}).AddCookie();
+    OktaDomain = builder.Configuration.GetValue<string>("Okta:Domain")
+});
 
 var app = builder.Build();
 
