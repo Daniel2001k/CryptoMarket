@@ -14,15 +14,17 @@ builder.Services.AddHttpClient("CryptoMarket.ServerAPI", client => client.BaseAd
 
 builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("CryptoMarket.ServerAPI"));
 
-builder.Services.AddOidcAuthentication<RemoteAuthenticationState, CustomUserAccount>(options =>
+var authority = builder.Configuration.GetValue<string>("Okta:Authority");
+var clientId = builder.Configuration.GetValue<string>("Okta:ClientId");
+
+builder.Services.AddOidcAuthentication(options =>
 {
-    builder.Configuration.Bind("Okta", options.ProviderOptions);
+    options.ProviderOptions.Authority = authority;
+    options.ProviderOptions.ClientId = clientId;
     options.ProviderOptions.ResponseType = "code";
-    options.ProviderOptions.DefaultScopes.Add("profile");
-    options.ProviderOptions.DefaultScopes.Add("address");
-}).AddAccountClaimsPrincipalFactory<RemoteAuthenticationState, CustomUserAccount, CustomAccountFactory>();
+});
 
-
+builder.Services.AddApiAuthorization();
 builder.Services.AddMudServices();
 
 await builder.Build().RunAsync();
